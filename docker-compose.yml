@@ -1,0 +1,35 @@
+services:
+  chromadb:
+    image: chromadb/chroma:0.6.3
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=false
+      - IS_PERSISTENT=TRUE
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v2/heartbeat')" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+  agent-api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    volumes:
+      - ./trajectories:/app/trajectories
+    command: uvicorn agent.api:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - CHROMA_MODE=http
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+
+volumes:
+  chroma_data:
