@@ -1,0 +1,6 @@
+invalid type: string "The task involved navigating to Wikipedia's homepage and compiling information about its features. The navigation step was successful, but compiling the information is still pending.", expected i64nagerImpl[ConsoleMessage]:
+        return self.expect_event(Page.Events.Console, predicate, timeout)
+
+    def expect_page(
+        self,
+        predicate: Callable[[Page], bool] = 
